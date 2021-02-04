@@ -21,3 +21,36 @@ def reports(request):
 	if _force:
 		return HttpResponseRedirect("/integracion/reportes/")
 	return render(request, 'report.html', context)
+
+def censo_paciente_buscar(request):
+	if request.method != 'POST':
+		return HttpResponseRedirect("/404/")
+
+	return HttpResponseRedirect(
+		"/integracion/censo/ingreso/"\
+			"?dni=%s&fist_name=%s&last_name=%s" % (
+			'46004343',
+			'ray',
+			'rojas'
+		))
+
+def censo(request):
+	context = {}
+
+	return render(request, 'censo.html', context)
+
+def censo_ingreso(request):
+	context = {}
+	return render(request, 'censo_ingreso.html', context)
+
+def censo_servicio(request):
+	context = {}
+	return render(request, 'censo_servicio.html', context)
+
+def censo_paciente_detalle(request):
+	context = {}
+	return render(request, 'censo_paciente_detalle.html', context)
+
+def censo_salida(request):
+	context = {}
+	return render(request, 'censo_salida.html', context)

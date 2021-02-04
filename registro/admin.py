@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Neonato, SalaObservacion, TurnoMedico, Tercero
+from .models import Neonato, Censo, Paciente, Servicio, TurnoMedico, Tercero
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 from rangefilter.filter import DateRangeFilter, DateTimeRangeFilter
@@ -19,14 +19,22 @@ class NeonatoAdmin(ImportExportModelAdmin,admin.ModelAdmin):
         list_editable = ("reg",)
         list_per_page = 12
         
-
-@admin.register(SalaObservacion)
-class SalaObservacionAdmin(admin.ModelAdmin):
-        fields = [('ingreso','dni'),('apellido1','apellido2'),('nombre1','nombre2'),('edad','ambiente','cama'),('salida','estado')]
-        list_display = ('ingreso','apellido1','apellido2','nombre1','cama')
-        search_fields = ['dni', 'apellido1','apellido2','nombre1','nombre2']
+@admin.register(Censo)
+class CensoAdmin(admin.ModelAdmin):
+        fields = [('tipo','paciente'),('ncama','adm'),('transferencia','alta'),('servicio')]
+        list_display = ('tipo','paciente','ncama','adm','transferencia','alta','servicio')
+        search_fields = ['paciente', 'servicio']
         list_per_page = 9
-        
+
+@admin.register(Paciente)
+class PacienteAdmin(admin.ModelAdmin):
+        class Meta:
+                model = Paciente
+@admin.register(Servicio)
+class ServicioAdmin(admin.ModelAdmin):
+        class Meta:
+                model = Servicio
+
 @admin.register(TurnoMedico)
 class TurnoMedicoAdmin(admin.ModelAdmin):
     fields = ['fecha','topico',('medico','turno')]

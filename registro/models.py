@@ -2,6 +2,7 @@ from django.db import models
 from datetime import datetime
 from django.utils import timezone
 import math
+from django.db.models import IntegerField, Model
 from django_userforeignkey.models.fields import UserForeignKey
 # Create your models here.
 
@@ -21,40 +22,6 @@ class Neonato(models.Model):
 	def save(self, *args, **kwargs):
 		self.dato = self.dato.upper()
 		super(Neonato, self).save(*args, kwargs)
-
-class SalaObservacion(models.Model):
-	ingreso = models.DateTimeField(default=datetime.now, blank=True, verbose_name='Fecha y Hora Ingreso')
-	dni = models.CharField(max_length=8, verbose_name='D.N.I.')
-	apellido1 = models.CharField(max_length=35, verbose_name='Apellido Paterno', blank=True)
-	apellido2 = models.CharField(max_length=35, verbose_name='Apellido Materno', blank=True)
-	nombre1 = models.CharField(max_length=35, verbose_name='Primer Nombre', blank=True)
-	nombre2 = models.CharField(max_length=35, verbose_name='Segundo Nombre', blank=True)
-	edad = models.CharField(max_length=3, verbose_name='Edad', blank=True)
-	historia =models.CharField(max_length=8, verbose_name='Hist. Clinica', blank=True)
-	ambiente = models.CharField(max_length=30, choices=(
-	('OBS. ADULTO','OBS. ADULTO'),('OBS. PEDIATRICO','OBS. PEDIATRICO')))
-	cama = models.CharField(max_length=30, verbose_name='Cama', choices=(
-	('CAMA-01','CAMA-01'),('CAMA-02','CAMA-02'),('CAMA-03','CAMA-03'),('CAMA-04','CAMA-04'),('CAMA-05','CAMA-05'),('CAMA-06','CAMA-06'),
-	('CAMA-07','CAMA-07'),('CAMA-08','CAMA-08'),('CAMA-09','CAMA-09'),('CAMA-10','CAMA-10'),('CAMA-11','CAMA-11'),('CAMA-12','CAMA-12'),
-	('CAMA-13','CAMA-13'),('CAMA-14','CAMA-14'),('CAMA-15','CAMA-15'),('CAMA-16','CAMA-16'),('CAMA-17','CAMA-17'),('CAMA-18','CAMA-18'),
-	('CAMA-19','CAMA-19'),('CAMA-20','CAMA-20'),('CAMA-21','CAMA-21'),('CAMA-22','CAMA-22'),('CAMA-23','CAMA-23'),('CAMA-24','CAMA-24'),
-	('CAMA-25','CAMA-25'),('CAMA-26','CAMA-26')))
-	salida = models.DateTimeField(default=datetime.now, verbose_name='Fecha y Hora Alta', blank=True)
-	estancia_hora = models.DecimalField(max_digits=5, decimal_places=2)
-	estado = models.CharField(max_length=30, choices=(
-		('HOSPITALIZADO','HOSPITALIZADO'),('TRANSF. INTERNA','TRANSF. INTERNA'),('TRANSF. EXTERNA','TRANSF. EXTERNA'),('ALTA','ALTA'),('MORGE','MORGE')))
-
-	def __str__(self):
-		return self.dni
-	def estancia_hora(self):
-                return math.ceil((self.salida - self.ingreso).total_seconds() / 3600)
-
-	def save(self, *args, **kwargs):
-		self.apellido1 = self.apellido1.upper()
-		self.apellido2 = self.apellido2.upper()
-		self.nombre1 = self.nombre1.upper()
-		self.nombre2 = self.nombre2.upper()
-		super(SalaObservacion, self).save(*args, kwargs)
 
 class TurnoMedico(models.Model):
 	fecha = models.DateField(default=timezone.now, verbose_name='FECHA')
@@ -91,6 +58,35 @@ class Tercero(models.Model):
 		self.domicilio = self.domicilio.upper()
 		self.observacion = self.observacion.upper()
 		super(Tercero, self).save(*args, kwargs)
+
+class Paciente(models.Model):
+	ingreso = models.DateTimeField(default=datetime.now, blank=True, verbose_name='Fecha y Hora Ingreso')
+	dni = models.CharField(max_length=8, verbose_name='D.N.I.')
+	nombre = models.CharField(max_length=35, verbose_name='Nombre', blank=True)
+	apellido = models.CharField(max_length=35, verbose_name='Apellidos', blank=True)
+	
+	def __str__(self):
+		return self.dni
+	def save(self, *args, **kwargs):
+		self.nombre = self.nombre.upper()
+		self.apellido = self.apellido.upper()
+		super(Paciente, self).save(*args, kwargs)
+
+class Servicio(models.Model):
+	nombre = models.CharField(max_length=250)
+	estacion = models.CharField(max_length=250)
+	ncamas = models.IntegerField()
+	fecha = models.DateTimeField(default=datetime.now, blank=True, verbose_name='Fecha de Registro')
+
+class Censo(models.Model):
+	tipo = models.CharField(max_length=4)
+	paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
+	ncama = IntegerField()
+	adm = models.BooleanField(default=False)
+	transferencia = models.CharField(max_length=250)
+	alta = models.BooleanField(default=False)
+	servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE)
+	usuario = UserForeignKey(auto_user_add=True, verbose_name='Usuario')
 
 class FileDataReport(models.Model):
 	filename = models.CharField(max_length=250, verbose_name='Filename')
