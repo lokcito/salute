@@ -1,0 +1,64 @@
+{% load ngvar %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reportes de camas</title>
+     <meta name="viewport"  content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" 
+      integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+   
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js" 
+            integrity="sha512-BrvVYNhKh6yST24E5DY/LopLO5d+8KYmIXyrpBIJ2PK+CyyJw/cLSG/BfJomWLC1IblNrmiJWGlrGueKLd/Ekw==" 
+            crossorigin="anonymous"></script>  
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
+    <style>
+.select-css{display:block;font-size:16px;font-family:sans-serif;font-weight:700;color:#444;line-height:1.3;padding:.6em 1.4em .5em .8em;width:100%;max-width:100%;box-sizing:border-box;margin:0;border:1px solid #aaa;box-shadow:0 1px 0 1px rgba(0,0,0,.04);border-radius:.5em;-moz-appearance:none;-webkit-appearance:none;appearance:none;background-color:#fff;background-image:url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'),linear-gradient(to bottom,#fff 0,#e5e5e5 100%);background-repeat:no-repeat,repeat;background-position:right .7em top 50%,0 0;background-size:.65em auto,100%}.select-css::-ms-expand{display:none}.select-css:hover{border-color:#888}.select-css:focus{border-color:#aaa;box-shadow:0 0 1px 3px rgba(59,153,252,.7);box-shadow:0 0 0 3px -moz-mac-focusring;color:#222;outline:0}.select-css option{font-weight:normal}*[dir="rtl"] .select-css,:root:lang(ar) .select-css,:root:lang(iw) .select-css{background-position:left .7em top 50%,0 0;padding:.6em .8em .5em 1.4em}.select-css:disabled,.select-css[aria-disabled=true]{color:graytext;background-image:url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22graytext%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'),linear-gradient(to bottom,#fff 0,#e5e5e5 100%)}.select-css:disabled:hover,.select-css[aria-disabled=true]{border-color:#aaa}    
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-md  shadow-sm">
+    <a class="navbar-brand" href="/">
+      <img width="128" src="https://oiss.org/wp-content/uploads/2000/01/Logo_EsSalud_2012.jpg">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mr-auto">
+
+        </ul>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link " href="/data">Inicio</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link " href="/integracion/reportes/">Reportes</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<main class="main">
+  <div class="banner position-relative overflow-hidden p-3 p-md-5 m-md-3  bg-light">
+    <div class="row">
+      <div class="col-xs-12 col-md-4 text-center">
+              <img src="https://seeklogo.com/images/E/essalud-logo-A4C876325F-seeklogo.com.png">
+      </div>      
+    </div>
+  </div>
+</main><footer class="">
+  <div class="container py-5">
+  <div class="row">
+    <div class="col-12 col-md text-center">
+      <div class="text-center mb-4 content-area">
+       
+      </div>
+      <small class="d-block mb-3 text-muted">Fuente: ESSI &copy; 2021</small>
+    </div>
+  </div>
+  </div>
+</footer>
+
+</body>
+</html>
