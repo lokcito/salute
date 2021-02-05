@@ -33,17 +33,21 @@
         </fieldset>
       </div>
     </div>
-    <form>
+    <form method="POST" action="/integracion/censo/ingreso/">
+      {% csrf_token %}
+      <input type="hidden" 
+        value="{{ paciente.id }}" 
+        name="paciente">
       <div class="row">
         <div class="col">
           <fieldset class="border p-2">
             <legend  class="w-auto">Registro de ingreso</legend>
             <div class="pl-4 pr-4 pb-4">
               <div class="form-group">
-                <select class="select-css">
+                <select name="servicio" class="select-css">
                   <option value="-" selected="selected">-- Seleccione el Servicio -- </option>
-                  {% for x in services %}
-                  <option value="{{x}}">{{ x }}</option>
+                  {% for x in servicios %}
+                  <option value="{{x.id}}">{{ x.nombre }} / {{ x.estacion }}</option>
                   {% endfor %}
                 </select>
                 <div class="text-right">
@@ -54,14 +58,12 @@
                 <div class="col-4">
                   <div class="form-group">
                     <label># de cama</label>
-                    <input type="number" class="form-control"/>
+                    <input type="number" name="ncama" class="form-control"/>
                   </div>
                 </div>
-              </div>
-              <div class="row">
                 <div class="col-4">
                   <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" checked>
+                    <input name="adm" class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" checked>
                     <label class="form-check-label" for="flexSwitchCheckChecked">Admision</label>
                   </div>
                 </div>
@@ -69,8 +71,12 @@
               <div class="row">
                 <div class="col">
                   <div class="form-group">
-                    <label for="comment">Transferencia</label>
-                    <textarea class="form-control" rows="5" id="comment"></textarea>
+                    <label for="transferencia">Transferencia</label>
+                    <textarea 
+                      name="transferencia"
+                      class="form-control" 
+                      rows="5" 
+                      id="transferencia"></textarea>
                   </div>
                   <button type="submit" class="btn btn-primary">Registrar</button>
                 </div> 

@@ -1,12 +1,18 @@
 from django.shortcuts import render
-from registro.models import FileDataReport
+from registro.models import FileDataReport, \
+	Servicio, Paciente, Censo
 from pytz import timezone, UTC
 from datetime import datetime, time, timedelta
 from registro.utils import scrapfile,\
 	 datetime_now, get_file_data, get_dict_from_data,\
-	 get_services, get_valid_rows
+	 get_services, get_valid_rows, \
+	 paciente_get_or_create
 from django.http import JsonResponse
-from django.http import HttpResponseRedirect, HttpResponse, QueryDict
+from django.http import HttpResponseRedirect, \
+	HttpResponse, QueryDict
+from registro.forms import ServicioForm, \
+	CensoIngresoForm
+
 # Create your views here.
 def reports(request):
 	context = {}
@@ -26,25 +32,71 @@ def censo_paciente_buscar(request):
 	if request.method != 'POST':
 		return HttpResponseRedirect("/404/")
 
+	_dni = request.POST.get("dni", "-")
+	paciente = paciente_get_or_create(_dni)
+	if paciente is None:
+		return HttpResponseRedirect("/404/")
+
 	return HttpResponseRedirect(
 		"/integracion/censo/ingreso/"\
 			"?dni=%s&fist_name=%s&last_name=%s" % (
-			'46004343',
-			'ray',
-			'rojas'
+			paciente.dni,
+			paciente.nombre,
+			paciente.apellido
 		))
 
 def censo(request):
-	context = {}
+	context = {
+		'censos': Censo.objects.filter(tipo = 'IN')
+	}
 
 	return render(request, 'censo.html', context)
 
 def censo_ingreso(request):
-	context = {}
+	if request.method == "POST":
+		_POST = request.POST.copy()
+		_POST['tipo'] = 'IN'
+		_POST['alta'] = 0
+		_POST['usuario'] = 'ss'
+		form = CensoIngresoForm(_POST)
+		if not form.is_valid():
+			print("<>|", form.errors)
+			return HttpResponseRedirect("/404/")
+
+		form.save()
+		return HttpResponseRedirect("/integracion/censo/")
+
+	_dni = request.GET.get("dni", "-")
+	if _dni == "-":
+		return HttpResponseRedirect("/404/")
+
+	paciente = Paciente.objects.filter(dni = _dni).first()
+
+	if paciente is None:
+		return HttpResponseRedirect("/404/")
+
+
+	context = {
+		'servicios': Servicio.objects.all().order_by('-fecha'),
+		'paciente': paciente
+	}
+
 	return render(request, 'censo_ingreso.html', context)
 
 def censo_servicio(request):
-	context = {}
+	if request.method == 'POST':
+		form = ServicioForm(request.POST)
+		if not form.is_valid():
+			return HttpResponseRedirect("/integracion/censo/servicio/")
+
+		form.save()
+
+		return HttpResponseRedirect("/integracion/censo/servicio/?reload=%s" % (datetime.now()))
+
+	context = {
+		'services': ['xxx', 'yyyy'],
+		'list': Servicio.objects.all().order_by('-fecha')
+	}
 	return render(request, 'censo_servicio.html', context)
 
 def censo_paciente_detalle(request):

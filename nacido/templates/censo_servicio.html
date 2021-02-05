@@ -6,11 +6,12 @@
     <div class="row">
       <div class="col">
         <fieldset class="border p-2 mb-4">
-          <legend  class="w-auto">Paciente</legend>
+          <legend  class="w-auto">Registro de Grupo</legend>
           <div class="pl-4">
-            <form>
+            <form method="POST" action="/integracion/censo/servicio/">
+              {% csrf_token %}
               <div class="pb-4">
-                <select class="select-css">
+                <select name="nombre" class="select-css">
                   <option value="-" selected="selected">-- Seleccione el Servicio -- </option>
                   {% for x in services %}
                   <option value="{{x}}">{{ x }}</option>
@@ -18,7 +19,7 @@
                 </select>
               </div>
               <div class="pb-4">
-                <select class="select-css">
+                <select name="estacion" class="select-css">
                   <option value="-" selected="selected">-- Seleccione la Estacion -- </option>
                   {% for x in services %}
                   <option value="{{x}}">{{ x }}</option>
@@ -28,8 +29,9 @@
               <div class="row">
                 <div class="col-4">
                   <div class="form-group">
-                    <label># de cama</label>
-                    <input type="number" class="form-control"/>
+                    <label># de camas</label>
+                    <input name="ncamas" type="number" 
+                      class="form-control"/>
                   </div>
                   <div class="form-group">
                     <button type="submit" class="btn btn-primary">Crear</button>
@@ -55,13 +57,15 @@
       </tr>
     </thead>
     <tbody>
+      {% for x in list %}
       <tr>
-        <td>Medicina Interna</td>
-        <td>Medicina II</td>
-        <th>14</th>
+        <td>{{ x.nombre }}</td>
+        <td>{{ x.estacion }}</td>
+        <th>{{ x.ncamas }}</th>
         <th><button type="button" class="btn btn-info">Ver</button></th>
         <th><button type="button" class="btn btn-primary">Agregar</button></th>
       </tr>
+      {% endfor %}
     </tbody>
   </table>
   </div>

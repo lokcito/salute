@@ -3,6 +3,31 @@ from pytz import timezone
 from datetime import datetime
 from datetime import datetime, time, timedelta
 
+def scrap_people(_dni):
+	if _dni == "46004343":
+		return {
+			"dni": "46004343",
+			"nombres": "Ray Leonard",
+			"apellidos": "Rojas Enciso"
+		}
+	return None	
+
+def paciente_get_or_create(_dni):
+	from registro.models import Paciente
+	from datetime import datetime
+
+	o = Paciente.objects.filter(dni = _dni).first()
+	if o is None:
+		_data = scrap_people(_dni)
+
+		pa = Paciente(dni = _dni, 
+			nombre = _data["nombres"],
+			apellido = _data["apellidos"])
+		pa.ingreso = datetime.now()
+		pa.save()
+		return pa
+	return o
+
 def get_valid_rows(filename):
 	f = open(filename, encoding="utf8", mode = 'r+')
 	lines = [line for line in f.readlines()]

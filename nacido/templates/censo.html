@@ -24,16 +24,18 @@
       </tr>
     </thead>
     <tbody>
+      {% for x in censos %}
       <tr>
-        <td>Ray Rojas Enciso</td>
-        <td>Medicina Interna</td>
-        <td>Medicina II</td>
-        <th>14</th>
-        <th>SI</th>
-        <th>NO</th>
+        <td>{{ x.paciente.text }}</td>
+        <td>{{ x.servicio.nombre }}</td>
+        <td>{{ x.servicio.estacion }}</td>
+        <th>{{ x.ncama }}</th>
+        <th>{{ x.get_adm_text }}</th>
+        <th>{{ x.transferencia }}</th>
         <th><button type="button" class="btn btn-info">Ver</button></th>
         <th><button type="button" class="btn btn-danger">Mover</button></th>
       </tr>
+      {% endfor %}
     </tbody>
   </table>
   </div>

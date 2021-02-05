@@ -70,6 +70,10 @@ class Paciente(models.Model):
 	
 	def __str__(self):
 		return self.dni
+
+	def text(self):
+		return "%s %s" % (self.nombre, self.apellido)
+
 	def save(self, *args, **kwargs):
 		self.nombre = self.nombre.upper()
 		self.apellido = self.apellido.upper()
@@ -83,13 +87,16 @@ class Servicio(models.Model):
 
 class Censo(models.Model):
 	tipo = models.CharField(max_length=4)
-	paciente = models.ForeignKey(Paciente, on_delete=models.CASCADE)
+	paciente = models.ForeignKey(Paciente, 
+		on_delete=models.CASCADE)
 	ncama = IntegerField()
 	adm = models.BooleanField(default=False)
 	transferencia = models.CharField(max_length=250)
 	alta = models.BooleanField(default=False)
-	servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE)
-	usuario = UserForeignKey(auto_user_add=True, verbose_name='Usuario')
+	servicio = models.ForeignKey(Servicio, 
+		on_delete=models.CASCADE)
+	usuario = UserForeignKey(auto_user_add=True, 
+		verbose_name='Usuario')
 
 class Pagare(models.Model):
 	fecha = models.DateField(default=datetime.now, blank=True, verbose_name='Fecha')
