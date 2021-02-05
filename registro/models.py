@@ -4,6 +4,9 @@ from django.utils import timezone
 import math
 from django.db.models import IntegerField, Model
 from django_userforeignkey.models.fields import UserForeignKey
+#from django.contrib.auth.models import user
+
+
 # Create your models here.
 
 class Neonato(models.Model):
@@ -87,6 +90,30 @@ class Censo(models.Model):
 	alta = models.BooleanField(default=False)
 	servicio = models.ForeignKey(Servicio, on_delete=models.CASCADE)
 	usuario = UserForeignKey(auto_user_add=True, verbose_name='Usuario')
+
+class Pagare(models.Model):
+	fecha = models.DateField(default=datetime.now, blank=True, verbose_name='Fecha')
+	pagare = models.CharField(max_length=7, verbose_name='N° de Pagare')
+	contingencia = models.CharField(max_length=30, verbose_name='Contingencia',choices=(('NO ACREDITADO','NO ACREDITADO'),('AGRESION POR TERCEROS','AGRESION POR TERCEROS'),('ACCIDENTE DE TRANSITO','ACCIDENTE DE TRANSITO'),
+	('ACCIDENTE DE MOTO','ACCIDENTE DE MOTO'),('PARTICULAR','PARTICULAR'),('INTENTO DE SUICIDIO','INTENTO DE SUICIDIO')))
+	dni1 = models.CharField(max_length=8, verbose_name='D.N.I.')
+	paciente = models.CharField(max_length=35, verbose_name='Datos del Paciente')
+	dni2 = models.CharField(max_length=8, verbose_name='D.N.I')
+	aval = models.CharField(max_length=40, verbose_name='Datos del Aval')
+	domicilio = models.CharField(max_length=35, verbose_name='Domicilio')
+	movil = models.CharField(max_length=9, verbose_name='Telefono / Movil')
+	obs = models.CharField(max_length=200, verbose_name= 'Deposito/Garantia')
+	#user = UserForeignKey(auto_user_add=True, verbose_name='Responsable')
+
+	def __str__(self):
+		return self.pagare
+
+	def save(self, *args, **kwargs):
+		self.paciente= self.paciente.upper()
+		self.aval = self.aval.upper()
+		self.domicilio = self.domicilio.upper()
+		self.obs = self.obs.upper()
+		super(Pagare, self).save(*args, kwargs)
 
 class FileDataReport(models.Model):
 	filename = models.CharField(max_length=250, verbose_name='Filename')

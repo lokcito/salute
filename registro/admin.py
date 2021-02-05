@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Neonato, Censo, Paciente, Servicio, TurnoMedico, Tercero
+from .models import Neonato, Censo, Paciente, Servicio, TurnoMedico, Tercero, Pagare
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 from rangefilter.filter import DateRangeFilter, DateTimeRangeFilter
@@ -18,6 +18,12 @@ class NeonatoAdmin(ImportExportModelAdmin,admin.ModelAdmin):
         search_fields = ['dato','dni']
         list_editable = ("reg",)
         list_per_page = 12
+
+@admin.register(Pagare)
+class PagareAdmin(admin.ModelAdmin):
+    fields = [('fecha','pagare','contingencia'),('dni1','paciente'),('dni2','aval'),('domicilio','movil'),('obs')]
+    list_display = ('fecha','pagare','contingencia','dni1','paciente','dni2','aval','domicilio','movil','obs')
+    list_per_page = 10
         
 @admin.register(Censo)
 class CensoAdmin(admin.ModelAdmin):
