@@ -11,7 +11,7 @@ from django.http import JsonResponse
 from django.http import HttpResponseRedirect, \
 	HttpResponse, QueryDict
 from registro.forms import ServicioForm, \
-	CensoIngresoForm
+	CensoIngresoForm, CensoSalidaForm
 
 # Create your views here.
 def reports(request):
@@ -39,7 +39,7 @@ def censo_paciente_buscar(request):
 
 	return HttpResponseRedirect(
 		"/integracion/censo/ingreso/"\
-			"?dni=%s&fist_name=%s&last_name=%s" % (
+			"?took=true&dni=%s&fist_name=%s&last_name=%s" % (
 			paciente.dni,
 			paciente.nombre,
 			paciente.apellido
@@ -47,24 +47,47 @@ def censo_paciente_buscar(request):
 
 def censo(request):
 	context = {
-		'censos': Censo.objects.filter(tipo = 'IN')
+		'censos': Censo.objects.filter(gone = False, 
+				servicio_id = request.GET.get('censo_id'))
 	}
 
 	return render(request, 'censo.html', context)
 
+def censo_salidas(request):
+	context = {
+		'censos': Censo.objects.\
+			filter(gone = True, 
+				servicio_id = request.GET.get('censo_id'))
+	}
+
+	return render(request, 'censo.html', context)
+	
 def censo_ingreso(request):
 	if request.method == "POST":
 		_POST = request.POST.copy()
-		_POST['tipo'] = 'IN'
+		_POST['gone'] = 0
+		_POST['salida'] = '-'
 		_POST['alta'] = 0
 		_POST['usuario'] = 'ss'
+		_POST['transferencia'] = _POST.get('transferencia', '-')
+		if len(_POST['transferencia']) <= 0:
+			_POST['transferencia'] = '-'
 		form = CensoIngresoForm(_POST)
 		if not form.is_valid():
 			print("<>|", form.errors)
 			return HttpResponseRedirect("/404/")
 
 		form.save()
-		return HttpResponseRedirect("/integracion/censo/")
+		return HttpResponseRedirect("/integracion/censo/?censo_id=" + _POST['servicio'])
+	
+	context = {
+		'servicios': Servicio.objects.all().order_by('-fecha'),
+	}
+	
+	_took = request.GET.get("took", "-")
+	if _took == "-":
+		return render(request, 'censo_ingreso.html', context)
+	
 
 	_dni = request.GET.get("dni", "-")
 	if _dni == "-":
@@ -72,14 +95,10 @@ def censo_ingreso(request):
 
 	paciente = Paciente.objects.filter(dni = _dni).first()
 
+	context['paciente'] = paciente
+
 	if paciente is None:
 		return HttpResponseRedirect("/404/")
-
-
-	context = {
-		'servicios': Servicio.objects.all().order_by('-fecha'),
-		'paciente': paciente
-	}
 
 	return render(request, 'censo_ingreso.html', context)
 
@@ -101,8 +120,51 @@ def censo_servicio(request):
 
 def censo_paciente_detalle(request):
 	context = {}
+	_id = request.GET.get('censo_id', '-')
+	
+	if _id == '-':
+		return HttpResponseRedirect("/404/")
+	
+	context['censo'] = Censo.objects.get(id = _id)
+	
 	return render(request, 'censo_paciente_detalle.html', context)
 
 def censo_salida(request):
+	if request.method == "POST":
+		censo = Censo.objects\
+			.get(id = request.POST.get("censo_id"))
+		
+		if censo.gone:
+			return HttpResponseRedirect(censo.get_link())
+		
+		POST = request.POST.copy()
+		POST["gone"] = "1"
+		
+		POST['salida'] = POST.get('salida', '-')
+		if len(POST['salida']) <= 0:
+			POST['salida'] = '-'
+			
+		form = CensoSalidaForm(POST, instance = censo)
+		if not form.is_valid():
+			print(">", form.errors)
+			return HttpResponseRedirect("/404/")
+			
+		form.save()
+		return HttpResponseRedirect(censo.get_link())
+			
 	context = {}
+
+	_id = request.GET.get('censo_id', '-')
+	
+	if _id == '-':
+		return HttpResponseRedirect("/404/")
+	
+	context['censo'] = Censo.objects.get(id = _id)
+	
+	# context['outputs'] = context['censo'].get_outputs()
+	if context['censo'].gone:
+		return HttpResponseRedirect(context['censo'].get_link())
+	# if context['outputs'].exists():
+	# 	return HttpResponseRedirect(context['censo'].get_link())
+	
 	return render(request, 'censo_salida.html', context)

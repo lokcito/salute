@@ -11,3 +11,12 @@ class CensoIngresoForm(ModelForm):
 	class Meta:
 		model = Censo
 		exclude = []
+
+class CensoSalidaForm(ModelForm):
+	class Meta:
+		model = Censo
+		exclude = ['paciente', 
+			'ncama', 
+			'adm', 
+			'transferencia', 
+			'servicio']

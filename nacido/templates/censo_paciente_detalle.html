@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+	<div class="row">
+		<div class="col">
+			<h1>Detalle de Paciente Hospitalizado</h1>
+			<h2>Ingreso</h2>
+			<table class="table table-bordered">
+				<thead>
+					<tr>
+						<th>Paciente</th>
+						<th>Servicio</th>
+						<th>Estacion</th>
+						<th>N° de Cama</th>
+						<th>Admision</th>
+						<th>Movimiento</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>{{ censo.paciente.text }}</td>
+						<td>{{ censo.servicio.nombre }}</td>
+						<td>{{ censo.servicio.estacion }}</td>
+						<th>{{ censo.ncama }}</th>
+						<th>{{ censo.get_adm_text }}</th>
+						<th>{{ censo.transferencia }}</th>
+					</tr>
+				</tbody>
+			</table>
+			{% if censo.gone %}
+			<h2>Egreso</h2>
+			<table class="table table-bordered">
+				<thead>
+				<tr>
+					<th>Alta</th>
+					<th>Defuncion</th>
+					<th>Estado</th>
+				</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>{{ censo.get_alta_text }}</td>
+						<td>{{ censo.get_defuncion_text }}</td>
+						<td>{{ censo.salida }}</td>
+					</tr>
+				</tbody>
+			</table>
+			{% endif %}
+			<a href="/integracion/censo/servicio/" 
+				class="btn btn-primary">Volver a la Lista</a>
+		</div>
+	</div>
+</div>
+{% endblock %}
