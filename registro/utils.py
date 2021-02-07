@@ -4,6 +4,7 @@ from datetime import datetime
 from datetime import datetime, time, timedelta
 
 def scrap_people(_dni):
+
 	if _dni == "46004343":
 		return {
 			"dni": "46004343",
@@ -144,7 +145,9 @@ def get_file_data(force = False):
 
 	return current_file
 
-def scrapfile():
+
+
+def auth_explota():
 	s = requests.Session()
 	response = s.post('http://172.20.0.210:8080/explotacionDatos/servlet/Index', data={
 		"USER": "41713667",
@@ -153,8 +156,6 @@ def scrapfile():
 		"opt": "0",
 		"Submit": "Ingresar"
 	})
-	#print(">>", response.status_code)
-	#print("||>", response.text)
 	response = s.post('http://172.20.0.210:8080/explotacionDatos/servlet/Index', data={
 		"centroAsistencial": "307",
 		"upd": "indexCas",
@@ -162,6 +163,13 @@ def scrapfile():
 		"USER": "41713667",
 		"PASS": "help778020"
 	})
+	return s
+
+
+def scrapfile():
+	s = auth()
+	#print(">>", response.status_code)
+	#print("||>", response.text)
 	#print(">>>", response.status_code)
 	#print("||>", response.text)
 	response = s.post('http://172.20.0.210:8080/explotacionDatos/servlet/CtrlControl?opt=hospitalCama_1_xls', {
