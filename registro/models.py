@@ -86,17 +86,38 @@ class Servicio(models.Model):
 	fecha = models.DateTimeField(default=datetime.now, blank=True, verbose_name='Fecha de Registro')
 
 class Censo(models.Model):
-	tipo = models.CharField(max_length=4)
 	paciente = models.ForeignKey(Paciente, 
 		on_delete=models.CASCADE)
 	ncama = IntegerField()
 	adm = models.BooleanField(default=False)
 	transferencia = models.CharField(max_length=250)
+	gone = models.BooleanField(default=False)
 	alta = models.BooleanField(default=False)
 	servicio = models.ForeignKey(Servicio, 
 		on_delete=models.CASCADE)
 	usuario = UserForeignKey(auto_user_add=True, 
 		verbose_name='Usuario')
+	salida = models.CharField(max_length=250, 
+		default = '-')
+	
+	def get_alta_text(self):
+		return 'Si' if self.alta else 'No'
+	
+	def get_defuncion_text(self):
+		return 'No' if self.alta else 'Si'
+		
+	
+	def get_move(self):
+		return '/integracion/censo/salida/?censo_id=%s' % (self.id)
+	
+	def get_link(self):
+		return '/integracion/censo/paciente/detalle/?censo_id=%s' % (self.id)
+
+	def get_adm_text(self):
+		return 'Si' if self.adm else 'No'
+
+	# def get_outputs(self):
+	# 	return Censo.objects.filter(parent = self)
 
 class Pagare(models.Model):
 	fecha = models.DateField(default=datetime.now, blank=True, verbose_name='Fecha')

@@ -1,6 +1,8 @@
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# print("><>>>>", BASE_DIR)
+# BASE_DIR = os.path.abspath(os.path.join(__file__, ))
 
 SECRET_KEY = 'w@-9-4ziw(o!2a&^@8e8kg3^3#1fe6!0nkf&-e((70058a42&2'
 
@@ -16,7 +18,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'livesync',
+    # 'livesync',
     'django.contrib.staticfiles',
     'django_userforeignkey',
     'import_export',
@@ -37,11 +39,11 @@ MIDDLEWARE = [
 ]
 
 MIDDLEWARE_CLASSES = [
-    'livesync.middleware.DjangoLiveSyncMiddleware',
+    # 'livesync.middleware.DjangoLiveSyncMiddleware',
 ]
 
 ROOT_URLCONF = 'nacido.urls'
-
+# print("><>>>|", os.path.join(BASE_DIR, 'nacido/templates'))
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -59,6 +61,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'nacido.wsgi.application'
+
+# print("|><>>>|", os.path.join(BASE_DIR, 'db.sqlite3'))
 
 DATABASES = {
     'default': {
@@ -95,6 +99,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 DATETIME_FORMAT = 'd/m/Y H:i'
+
+# print("aaa><>>>", os.path.join(BASE_DIR, "static_extra"))
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 STATICFILES_DIRS = [

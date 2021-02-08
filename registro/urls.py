@@ -9,5 +9,6 @@ urlpatterns = [
 	re_path('^censo/servicio/$', views.censo_servicio),
 	re_path('^censo/paciente/detalle/$', views.censo_paciente_detalle),
 	re_path('^censo/salida/$', views.censo_salida),
+	re_path('^censo/salidas/$', views.censo_salidas),
 	re_path('^censo/paciente/buscar/$', views.censo_paciente_buscar),
 ]

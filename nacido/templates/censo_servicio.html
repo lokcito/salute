@@ -2,6 +2,34 @@
 {% block content %}
 <div>
   <div class="container pt-3">
+    <div>
+      <h3>Censos Creados</h3>
+    </div>
+    <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Servicio</th>
+        <th>Estacion</th>
+        <th>N° de Cama</th>
+        <th></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for x in list %}
+      <tr>
+        <td>{{ x.nombre }}</td>
+        <td>{{ x.estacion }}</td>
+        <th>{{ x.ncamas }}</th>
+        <th><a href="/integracion/censo/?censo_id={{ x.id }}" 
+          class="btn btn-info">Ingreso</a></th>
+        <th><a href="/integracion/censo/salidas/?censo_id={{ x.id }}" 
+          class="btn btn-primary">Salidas</a></th>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <hr>
     <h2>Creacion de Censo - Grupo</h2>
     <div class="row">
       <div class="col">
@@ -43,31 +71,6 @@
         </fieldset>
       </div>
     </div>
-    <div>
-      <h3>Censos Creados</h3>
-    </div>
-    <table class="table table-bordered">
-    <thead>
-      <tr>
-        <th>Servicio</th>
-        <th>Estacion</th>
-        <th>N° de Cama</th>
-        <th>Ver</th>
-        <th>Agregar</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for x in list %}
-      <tr>
-        <td>{{ x.nombre }}</td>
-        <td>{{ x.estacion }}</td>
-        <th>{{ x.ncamas }}</th>
-        <th><button type="button" class="btn btn-info">Ver</button></th>
-        <th><button type="button" class="btn btn-primary">Agregar</button></th>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
   </div>
 </div>
 {% endblock %}
