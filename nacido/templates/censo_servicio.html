@@ -47,12 +47,9 @@
                 </select>
               </div>
               <div class="pb-4">
-                <select name="estacion" class="select-css">
-                  <option value="-" selected="selected">-- Seleccione la Estacion -- </option>
-                  {% for x in services %}
-                  <option value="{{x}}">{{ x }}</option>
-                  {% endfor %}
-                </select>
+                <label>Ingrese la estacion</label>
+                <input name="estacion" type="text" 
+                      class="form-control"/>
               </div>
               <div class="row">
                 <div class="col-4">
