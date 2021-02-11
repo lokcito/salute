@@ -1,11 +1,13 @@
 from django.shortcuts import render
+from django.contrib import messages
+
 from registro.models import FileDataReport, \
 	Servicio, Paciente, Censo
 from pytz import timezone, UTC
 from datetime import datetime, time, timedelta
 from registro.utils import scrapfile,\
 	 datetime_now, get_file_data, get_dict_from_data,\
-	 get_services, get_valid_rows, \
+	 get_services_from_file, get_valid_rows, \
 	 paciente_get_or_create, auth_essalud, \
 	 scrap_services
 from django.http import JsonResponse
@@ -23,7 +25,7 @@ def reports(request):
 		return HttpResponseRedirect("/404/")
 	context['record'] = record_report
 	context['alldata'] = get_valid_rows(record_report.filename);
-	context['services'] = get_services(record_report.filename)
+	context['services'] = get_services_from_file(record_report.filename)
 	context['filtered'] = get_dict_from_data(record_report.filename)
 	if _force:
 		return HttpResponseRedirect("/integracion/reportes/")
@@ -36,9 +38,8 @@ def censo_paciente_buscar(request):
 	_dni = request.POST.get("dni", "-")
 	paciente = paciente_get_or_create(_dni)
 	if paciente is None:
-		return HttpResponseRedirect("/404/")
-
-	auth_essalud()
+		messages.info(request, "El DNI ingresado no es valido.")
+		return HttpResponseRedirect("/integracion/censo/ingreso/")
 
 	return HttpResponseRedirect(
 		"/integracion/censo/ingreso/"\
@@ -50,8 +51,8 @@ def censo_paciente_buscar(request):
 
 def censo(request):
 	context = {
-		'censos': Censo.objects.filter(gone = False, 
-				servicio_id = request.GET.get('censo_id'))
+		'censos': Censo.objects.filter(salida_tipo = '---', 
+				servicio_id = request.GET.get('servicio_id'))
 	}
 
 	return render(request, 'censo.html', context)
@@ -59,29 +60,30 @@ def censo(request):
 def censo_salidas(request):
 	context = {
 		'censos': Censo.objects.\
-			filter(gone = True, 
-				servicio_id = request.GET.get('censo_id'))
+			filter(servicio_id = request.GET.get('servicio_id')).\
+			exclude(salida_tipo = '---')
+
 	}
 
-	return render(request, 'censo.html', context)
+	return render(request, 'censo_salidas.html', context)
 	
 def censo_ingreso(request):
 	if request.method == "POST":
 		_POST = request.POST.copy()
-		_POST['gone'] = 0
+		_POST['salida_tipo'] = '---'
 		_POST['salida'] = '-'
-		_POST['alta'] = 0
+		_POST['salida_servicio'] = 0
 		_POST['usuario'] = 'ss'
 		_POST['transferencia'] = _POST.get('transferencia', '-')
 		if len(_POST['transferencia']) <= 0:
 			_POST['transferencia'] = '-'
 		form = CensoIngresoForm(_POST)
 		if not form.is_valid():
-			print("<>|", form.errors)
-			return HttpResponseRedirect("/404/")
+			messages.info(request, form.errors)
+			return HttpResponseRedirect("/integracion/censo/ingreso/")
 
 		form.save()
-		return HttpResponseRedirect("/integracion/censo/?censo_id=" + _POST['servicio'])
+		return HttpResponseRedirect("/integracion/censo/?servicio_id=" + _POST['servicio'])
 	
 	context = {
 		'servicios': Servicio.objects.all().order_by('-fecha'),
@@ -109,14 +111,21 @@ def censo_servicio(request):
 	if request.method == 'POST':
 		form = ServicioForm(request.POST)
 		if not form.is_valid():
+			messages.info(request, form.errors)
 			return HttpResponseRedirect("/integracion/censo/servicio/")
 
 		form.save()
 
 		return HttpResponseRedirect("/integracion/censo/servicio/?reload=%s" % (datetime.now()))
+	
+	record_report  = get_file_data()
+	if record_report is None:
+		return HttpResponseRedirect("/404/")
 
 	context = {
-		'services': scrap_services(),
+		'services': get_services_from_file(record_report.filename, extras = False),
+		'filtered': get_dict_from_data(record_report.filename),
+		'alldata': get_valid_rows(record_report.filename),
 		'list': Servicio.objects.all().order_by('-fecha')
 	}
 	return render(request, 'censo_servicio.html', context)
@@ -130,32 +139,68 @@ def censo_paciente_detalle(request):
 	
 	context['censo'] = Censo.objects.get(id = _id)
 	
+	print(">>>>", context['censo'].salida_tipo)
+
 	return render(request, 'censo_paciente_detalle.html', context)
+
+def censo_delete(request):
+	censo_id = request.GET.get('censo_id', '-')
+	if censo_id == '-':
+		return HttpResponseRedirect("/404/")
+	
+	censo_object = Censo.objects.get(id = censo_id)
+	servicio = censo_object.servicio
+
+	if censo_object.salida_tipo == '---':
+		return HttpResponseRedirect("/404/")
+
+	censo_object.delete()
+
+	return HttpResponseRedirect("/integracion/censo/?servicio_id=%s" % servicio.id)
+
+def censo_servicio_synced(request):
+	if request.method == "POST":
+		servicio = Servicio.objects.get(id = request.POST.get("servicio_id"))
+		val = request.POST.get("synced")
+		
+		if val == "on":
+			servicio.synced = True
+			servicio.save()
+		else:
+			servicio.synced = False
+			servicio.save()
+	return HttpResponseRedirect("/integracion/censo/servicio/")
 
 def censo_salida(request):
 	if request.method == "POST":
 		censo = Censo.objects\
 			.get(id = request.POST.get("censo_id"))
 		
-		if censo.gone:
+		if censo.has_gone():
 			return HttpResponseRedirect(censo.get_link())
 		
 		POST = request.POST.copy()
-		POST["gone"] = "1"
 		
 		POST['salida'] = POST.get('salida', '-')
 		if len(POST['salida']) <= 0:
 			POST['salida'] = '-'
-			
+		
 		form = CensoSalidaForm(POST, instance = censo)
 		if not form.is_valid():
-			print(">", form.errors)
-			return HttpResponseRedirect("/404/")
+			messages.info(request, form.errors)
+			return HttpResponseRedirect("/integracion/censo/salida/?censo_id=%s" % (censo.id))
 			
 		form.save()
 		return HttpResponseRedirect(censo.get_link())
-			
-	context = {}
+
+	
+	record_report  = get_file_data()
+	if record_report is None:
+		return HttpResponseRedirect("/404/")
+
+	context = {
+		'services': get_services_from_file(record_report.filename, extras = False)
+	}
 
 	_id = request.GET.get('censo_id', '-')
 	
@@ -165,7 +210,7 @@ def censo_salida(request):
 	context['censo'] = Censo.objects.get(id = _id)
 	
 	# context['outputs'] = context['censo'].get_outputs()
-	if context['censo'].gone:
+	if context['censo'].salida_tipo != '---':
 		return HttpResponseRedirect(context['censo'].get_link())
 	# if context['outputs'].exists():
 	# 	return HttpResponseRedirect(context['censo'].get_link())

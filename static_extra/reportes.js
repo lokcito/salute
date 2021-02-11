@@ -38,7 +38,21 @@ $(document).on("ready", function(){
 	}
 	function fillData(_da) {
 	  var data = _da;
-	  var template = "{{#Estaciones}}<tr><td>{{text}}</td>" + 
+	  var availables = 0;
+	  var unables = 0;
+	  var totals = 0;
+	  for(var i = 0; data['Estaciones'].length > i; i++) {
+	  	availables += data['Estaciones'][i].data.available;
+	  	unables += data['Estaciones'][i].data.unable;
+	  	totals += data['Estaciones'][i].data.total;
+	  }
+	  var template = "<tr>" + 
+		"<td></td>" +
+		"<td><strong>" + availables + "</strong></td>" +
+		"<td><strong>" + unables + "</strong></td>" +
+		"<td><strong>" + totals + "</strong></td>" +
+		"</tr>" + 
+	  	"{{#Estaciones}}<tr><td>{{text}}</td>" + 
 	  	"<td>{{data.available}} <a data-more='{{data.amore}}' " +
 	  	"href='#' style='float: right; color: white' " + 
 	  	" class='btn btn-info'>Ver</a></td><td>{{data.unable}} "+

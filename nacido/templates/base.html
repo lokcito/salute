@@ -40,6 +40,20 @@
         </ul>
     </div>
 </nav>
+
+{% if messages %}
+  <div class="container pt-1">
+    <div class="row">
+      <div class="col">
+    {% for message in messages %}
+    <div class="alert alert-warning">
+        {{ message }}
+    </div>
+    {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endif %}
 {% block content %}
 {% endblock %}
 <footer class="">

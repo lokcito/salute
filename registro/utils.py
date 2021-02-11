@@ -200,7 +200,8 @@ def paciente_get_or_create(_dni):
 	o = Paciente.objects.filter(dni = _dni).first()
 	if o is None:
 		_data = scrap_people(_dni)
-
+		if _data is None:
+			return None
 		pa = Paciente(dni = _dni, 
 			nombre = _data["nombres"],
 			apellido = _data["apellidos"])
@@ -225,12 +226,7 @@ def get_valid_rows(filename):
 			ii += 1;
 	return rr
 
-def get_services(_filename):
-	ss = []
-	for x in get_valid_rows(_filename):
-		ss.append(x[3])
-	mylist = list(dict.fromkeys(ss))
-	return mylist
+
 
 def get_station_from_list(_list):
 	ss = []
@@ -275,15 +271,32 @@ def get_list_from_data_vs_estacion(_all, estacion_list):
 			})
 	return st
 
+def get_services_from_file(_filename, extras = True):
+	ss = []
+	for x in get_valid_rows(_filename):
+		ss.append(x[3])
+	mylist = list(dict.fromkeys(ss))
+	# print(">>", mylist)
+	if extras:
+		mylist.append("COVID")
+		mylist.append("NO COVID")
+	return mylist
+
 def get_dict_from_data(_filename):
 	md = {}
 	_rows = get_valid_rows(_filename)
-	for s in get_services(_filename):
-		
-		# md[s] = map(lambda x: 'lower' if x[3] == s else 'higher', _rows)
+	for s in get_services_from_file(_filename):
 		md[s] = {}
-		_all = list(filter(lambda x: x[3] == s, _rows))
+		
+		if s == "COVID":
+			_all = list(filter(lambda x: ("cov" in x[4].lower()), _rows))
+		elif s == "NO COVID":
+			_all = list(filter(lambda x: not ("covi" in x[4].lower()), _rows))
+		else:
+			_all = list(filter(lambda x: x[3] == s, _rows))
+		
 		__all = get_station_from_list(_all)
+		
 		md[s]['Estaciones'] = get_list_from_data_vs_estacion(_all, __all)
 	return md
 

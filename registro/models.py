@@ -82,8 +82,20 @@ class Paciente(models.Model):
 class Servicio(models.Model):
 	nombre = models.CharField(max_length=250)
 	estacion = models.CharField(max_length=250)
+	habitacion = models.CharField(max_length=250)
 	ncamas = models.IntegerField()
+	synced = models.BooleanField(default=False)
 	fecha = models.DateTimeField(default=datetime.now, blank=True, verbose_name='Fecha de Registro')
+
+	def get_n_ingresos(self):
+		return Censo.objects.filter(servicio = self, salida_tipo = '---').count()
+
+	def get_n_salidas(self):
+		return Censo.objects.filter(servicio = self).exclude(salida_tipo = '---').count()
+
+	def text(self):
+		return "%s / %s / %s / Camas: %s" % (self.nombre, self.estacion, 
+				self.habitacion, str(self.ncamas))
 
 class Censo(models.Model):
 	paciente = models.ForeignKey(Paciente, 
@@ -91,20 +103,24 @@ class Censo(models.Model):
 	ncama = IntegerField()
 	adm = models.BooleanField(default=False)
 	transferencia = models.CharField(max_length=250)
-	gone = models.BooleanField(default=False)
-	alta = models.BooleanField(default=False)
+	salida_tipo = models.CharField(max_length=250, default = 'ALTA')
 	servicio = models.ForeignKey(Servicio, 
 		on_delete=models.CASCADE)
+	salida_servicio = models.CharField(max_length=250, default = '---')
 	usuario = UserForeignKey(auto_user_add=True, 
 		verbose_name='Usuario')
 	salida = models.CharField(max_length=250, 
 		default = '-')
 	
+	def get_transferencia_text(self):
+		if self.salida_tipo == 'TRAN':
+			return 'Transferencia a: %s' % (self.salida_servicio)
+		return ''
 	def get_alta_text(self):
-		return 'Si' if self.alta else 'No'
+		return 'Si' if self.salida_tipo == 'ALTA' else 'No'
 	
 	def get_defuncion_text(self):
-		return 'No' if self.alta else 'Si'
+		return 'Si' if self.salida_tipo == 'DEFU' else 'No'
 		
 	
 	def get_move(self):
@@ -116,6 +132,10 @@ class Censo(models.Model):
 	def get_adm_text(self):
 		return 'Si' if self.adm else 'No'
 
+	def has_gone(self):
+		if self.salida_tipo == '---':
+			return False
+		return True
 	# def get_outputs(self):
 	# 	return Censo.objects.filter(parent = self)
 

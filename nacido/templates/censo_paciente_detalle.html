@@ -26,15 +26,24 @@
 						<th>{{ censo.get_adm_text }}</th>
 						<th>{{ censo.transferencia }}</th>
 					</tr>
+					{% if not censo.has_gone %}
+					<tr>
+						<td class="text-right" colspan="6">
+							<a href="/integracion/censo/delete/?censo_id={{ censo.id }}" 
+								class="btn btn-danger">Eliminar</a>
+						</td>
+					</tr>
+					{% endif %}
 				</tbody>
 			</table>
-			{% if censo.gone %}
+			{% if censo.has_gone %}
 			<h2>Egreso</h2>
 			<table class="table table-bordered">
 				<thead>
 				<tr>
 					<th>Alta</th>
 					<th>Defuncion</th>
+					<th>Transferencia</th>
 					<th>Estado</th>
 				</tr>
 				</thead>
@@ -42,6 +51,7 @@
 					<tr>
 						<td>{{ censo.get_alta_text }}</td>
 						<td>{{ censo.get_defuncion_text }}</td>
+						<td>{{ censo.get_transferencia_text }}</td>
 						<td>{{ censo.salida }}</td>
 					</tr>
 				</tbody>

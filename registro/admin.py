@@ -27,8 +27,8 @@ class PagareAdmin(admin.ModelAdmin):
         
 @admin.register(Censo)
 class CensoAdmin(admin.ModelAdmin):
-        fields = [('ncama','adm'),('transferencia','alta'),('servicio')]
-        list_display = ('paciente','ncama','adm','transferencia','alta','servicio')
+        fields = [('ncama','adm'),('transferencia','salida_tipo'),('servicio')]
+        list_display = ('paciente','ncama','adm','transferencia','salida_tipo','servicio')
         search_fields = ['paciente', 'servicio']
         list_per_page = 9
 

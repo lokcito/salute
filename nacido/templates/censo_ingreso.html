@@ -24,10 +24,10 @@
               <strong>DNI: {{ paciente.dni }}</strong>
             </div>
             <div>
-              <strong>Nombres: {{ paciente.nombre }}</strong>
+              <strong>Apellidos: {{ paciente.apellido }} </strong>
             </div>
             <div>
-              <strong>Apellidos: {{ paciente.apellido }} </strong>
+              <strong>Nombres: {{ paciente.nombre }}</strong>
             </div>
           </div>
         </fieldset>
@@ -48,7 +48,7 @@
                 <select name="servicio" class="select-css">
                   <option value="-" selected="selected">-- Seleccione el Servicio -- </option>
                   {% for x in servicios %}
-                  <option value="{{x.id}}">{{ x.nombre }} / {{ x.estacion }}</option>
+                  <option value="{{x.id}}">{{ x.text }}</option>
                   {% endfor %}
                 </select>
                 <div class="text-right">

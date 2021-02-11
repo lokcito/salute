@@ -18,7 +18,7 @@
           <strong>Estacion: {{ censo.servicio.estacion }}</strong>
         </div>
         <div class="pl-4">
-          <strong>Cama: {{ censo.ncama }}</strong>
+          <strong>N° de Cama: {{ censo.ncama }}</strong>
         </div>
       </fieldset>
     </div>
@@ -34,31 +34,23 @@
               value="{{ censo.id }}"
               name="censo_id"/>
             <div class="row">
-              <div class="col">
-                <div class="form-check">
-                  <input class="form-check-input" 
-                    type="radio" 
-                    value="0" 
-                    name="alta" 
-                    id="alta">
-                  <label class="form-check-label" 
-                    for="alta">
-                    Defuncion
-                  </label>
-                </div>
+              <div class="col mb-4">
+                <select name="salida_tipo" id="salida_tipo" class="select-css">
+                  <option value="---" selected="selected">-- Seleccione Tipo Salida -- </option>
+                  <option value="ALTA">ALTA</option>
+                  <option value="DEFU">DEFUNCION</option>
+                  <option value="TRAN">TRANSFERENCIA</option>
+                </select>
               </div>
+            </div>
+            <div class="row">
               <div class="col">
-                <div class="form-check">
-                  <input class="form-check-input" 
-                    type="radio" 
-                    name="alta" 
-                    value="1" 
-                    id="alta" checked>
-                  <label class="form-check-label" 
-                    for="alta">
-                    Alta
-                  </label>
-                </div>
+                <select style="display: none" name="salida_servicio" id="salida_servicio" class="select-css">
+                  <option value="0" selected="selected">-- Seleccione el Servicio -- </option>
+                  {% for x in services %}
+                  <option value="{{x}}">{{ x }}</option>
+                  {% endfor %}
+                </select>
               </div>
             </div>
             <div class="form-group mt-3">
@@ -78,4 +70,8 @@
     </div>
   </div>
 </div>
+{% endblock %}
+{% block js %}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.12.0/underscore-min.js"></script>
+<script type="text/javascript" src="/static/censo_salida.js?v=210922"></script>
 {% endblock %}

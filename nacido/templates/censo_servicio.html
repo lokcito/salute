@@ -5,12 +5,16 @@
     <div>
       <h3>Censos Creados</h3>
     </div>
-    <table class="table table-bordered">
+    <table id="censo_table" class="table table-bordered">
     <thead>
       <tr>
+        <th>Fecha</th>
         <th>Servicio</th>
         <th>Estacion</th>
-        <th>N° de Cama</th>
+        <th>Camas</th>
+        <th># Pendientes</th>
+        <th># Atendidos</th>
+        <th>Subido al sistema</th>
         <th></th>
         <th></th>
       </tr>
@@ -18,13 +22,24 @@
     <tbody>
       {% for x in list %}
       <tr>
+        <td> 10/02/2021</td>
         <td>{{ x.nombre }}</td>
         <td>{{ x.estacion }}</td>
-        <th>{{ x.ncamas }}</th>
-        <th><a href="/integracion/censo/?censo_id={{ x.id }}" 
-          class="btn btn-info">Ingreso</a></th>
-        <th><a href="/integracion/censo/salidas/?censo_id={{ x.id }}" 
-          class="btn btn-primary">Salidas</a></th>
+        <td>{{ x.ncamas }}</td>
+        <td>{{ x.get_n_ingresos }}</td>
+        <td>{{ x.get_n_salidas }}</td>
+        <td>
+          <form action="/integracion/censo/servicio/synced" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="servicio_id" value="{{ x.id }}">
+            <input name="synced" {% if x.synced %}checked{% endif %} 
+              onchange="this.form.submit()" type="checkbox">
+          </form>
+        </td>
+        <td><a href="/integracion/censo/?servicio_id={{ x.id }}" 
+          class="btn btn-info">Ingresos</a></td>
+        <td><a href="/integracion/censo/salidas/?servicio_id={{ x.id }}" 
+          class="btn btn-primary">Egresos</a></td>
       </tr>
       {% endfor %}
     </tbody>
@@ -39,7 +54,7 @@
             <form method="POST" action="/integracion/censo/servicio/">
               {% csrf_token %}
               <div class="pb-4">
-                <select name="nombre" class="select-css">
+                <select name="nombre" id="servicio_combo" class="select-css">
                   <option value="-" selected="selected">-- Seleccione el Servicio -- </option>
                   {% for x in services %}
                   <option value="{{x}}">{{ x }}</option>
@@ -47,15 +62,20 @@
                 </select>
               </div>
               <div class="pb-4">
-                <label>Ingrese la estacion</label>
-                <input name="estacion" type="text" 
-                      class="form-control"/>
+                <label>Seleccione la estacion</label>
+                <select name="estacion" id="estacion_combo" class="select-css">
+                </select>
+              </div>
+              <div class="pb-4">
+                <label>Seleccione la habitacion</label>
+                <select name="habitacion" id="habitacion_combo" class="select-css">
+                </select>
               </div>
               <div class="row">
                 <div class="col-4">
                   <div class="form-group">
-                    <label># de camas</label>
-                    <input name="ncamas" type="number" 
+                    <label>Cantidad de camas</label>
+                    <input id="inpt_ncama" name="ncamas" type="number" 
                       class="form-control"/>
                   </div>
                   <div class="form-group">
@@ -70,4 +90,14 @@
     </div>
   </div>
 </div>
+{% endblock %}
+{% block js %}
+<script >
+  var _data = {{ filtered|safe }};
+  var _alldata = {{ alldata|safe }};
+</script>
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css">
+<script type="text/javascript" src="//cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.12.0/underscore-min.js"></script>
+<script type="text/javascript" src="/static/censo_servicio.js?v=s210922"></script>
 {% endblock %}
