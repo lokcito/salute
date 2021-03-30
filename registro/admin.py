@@ -21,9 +21,12 @@ class NeonatoAdmin(ImportExportModelAdmin,admin.ModelAdmin):
 
 @admin.register(Pagare)
 class PagareAdmin(admin.ModelAdmin):
-    fields = [('fecha','pagare','contingencia'),('dni1','paciente'),('dni2','aval'),('domicilio','movil'),('obs')]
-    list_display = ('fecha','pagare','contingencia','dni1','paciente','dni2','aval','domicilio','movil','obs')
-    list_per_page = 10
+    fields = [('fecha','pagare','contingencia'),('dni1','paciente'),('dni2','aval'),('domicilio'),('movil'),('ref'),('obs')]
+    list_display = ('fecha','pagare','contingencia','dni1','paciente','dni2','aval','domicilio','movil','obs','check')
+    search_fields = ['pagare','paciente','aval']
+    list_editable = ("check",)
+    list_per_page = 12
+
         
 @admin.register(Censo)
 class CensoAdmin(admin.ModelAdmin):

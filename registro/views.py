@@ -9,20 +9,32 @@ from registro.utils import scrapfile,\
 	 datetime_now, get_file_data, get_dict_from_data,\
 	 get_services_from_file, get_valid_rows, \
 	 paciente_get_or_create, auth_essalud, \
-	 scrap_services
+	 scrap_services, scrap_programacion
 from django.http import JsonResponse
 from django.http import HttpResponseRedirect, \
 	HttpResponse, QueryDict
 from registro.forms import ServicioForm, \
 	CensoIngresoForm, CensoSalidaForm
 
+def reports_programacion(request):
+	context = {}
+	data = scrap_programacion()
+	
+	context['data'] = data
+
+	return render(request, 'reports_programacion.html', context)
 # Create your views here.
+def search_paciente_en_cesos(request):
+	pass
+
+
 def reports(request):
 	context = {}
 	_force = request.GET.get('force', '-') == 'true'
 	record_report  = get_file_data(force =_force )
 	if record_report is None:
 		return HttpResponseRedirect("/404/")
+
 	context['record'] = record_report
 	context['alldata'] = get_valid_rows(record_report.filename);
 	context['services'] = get_services_from_file(record_report.filename)
@@ -35,6 +47,7 @@ def censo_paciente_buscar(request):
 	if request.method != 'POST':
 		return HttpResponseRedirect("/404/")
 
+	servicio_id = request.POST.get("servicio_id")
 	_dni = request.POST.get("dni", "-")
 	paciente = paciente_get_or_create(_dni)
 	if paciente is None:
@@ -43,27 +56,68 @@ def censo_paciente_buscar(request):
 
 	return HttpResponseRedirect(
 		"/integracion/censo/ingreso/"\
-			"?took=true&dni=%s&fist_name=%s&last_name=%s" % (
+			"?took=true&dni=%s&fist_name=%s&last_name=%s&servicio_id=%s" % (
 			paciente.dni,
 			paciente.nombre,
-			paciente.apellido
+			paciente.apellido,
+			servicio_id
 		))
 
 def censo(request):
-	context = {
-		'censos': Censo.objects.filter(salida_tipo = '---', 
-				servicio_id = request.GET.get('servicio_id'))
-	}
+	servicio_id = request.GET.get('servicio_id', '-')
+	if servicio_id == '-':
+		context = {
+			'censos': Censo.objects.filter(salida_tipo = '---')
+		}
+	else:
+		context = {
+			'censos': Censo.objects.filter(salida_tipo = '---', 
+					servicio_id = servicio_id),
+			'servicio': Servicio.objects.get(id = servicio_id)
+		}
 
 	return render(request, 'censo.html', context)
 
-def censo_salidas(request):
-	context = {
-		'censos': Censo.objects.\
-			filter(servicio_id = request.GET.get('servicio_id')).\
-			exclude(salida_tipo = '---')
 
-	}
+def censo_by_paciente(request):
+
+	dni = request.GET.get('dni', '-')
+	if dni == '-':
+		context = {
+			'censos': Censo.objects.filter().\
+				exclude(salida_tipo = '---')
+
+		}
+	else:
+		context = {
+			'censos': Censo.objects.\
+				filter(servicio_id = request.GET.get('servicio_id')).\
+				exclude(salida_tipo = '---'),
+			'servicio': Servicio.objects.get(id = servicio_id)
+
+		}
+
+
+	return render(request, 'censo_salidas.html', context)
+
+def censo_salidas(request):
+
+	servicio_id = request.GET.get('servicio_id', '-')
+	if servicio_id == '-':
+		context = {
+			'censos': Censo.objects.filter().\
+				exclude(salida_tipo = '---')
+
+		}
+	else:
+		context = {
+			'censos': Censo.objects.\
+				filter(servicio_id = request.GET.get('servicio_id')).\
+				exclude(salida_tipo = '---'),
+			'servicio': Servicio.objects.get(id = servicio_id)
+
+		}
+
 
 	return render(request, 'censo_salidas.html', context)
 	
@@ -85,8 +139,12 @@ def censo_ingreso(request):
 		form.save()
 		return HttpResponseRedirect("/integracion/censo/?servicio_id=" + _POST['servicio'])
 	
+	servicio_id = request.GET.get("servicio_id", "-")
+	if servicio_id == "-":
+		return HttpResponseRedirect("/404/")
+
 	context = {
-		'servicios': Servicio.objects.all().order_by('-fecha'),
+		'servicios': Servicio.objects.filter(id = servicio_id).order_by('-fecha'),
 	}
 	
 	_took = request.GET.get("took", "-")
@@ -109,6 +167,22 @@ def censo_ingreso(request):
 
 def censo_servicio(request):
 	if request.method == 'POST':
+		_now = datetime_now()
+		
+		
+
+		o = Servicio.objects.filter(fecha__year = _now.strftime('%Y'), 
+			fecha__month = _now.strftime('%m'),
+			fecha__day = _now.strftime('%d'), 
+			nombre = request.POST.get("nombre"),
+			estacion = request.POST.get("estacion"),
+			habitacion = request.POST.get("habitacion"))
+
+		if o.exists():
+			messages.info(request, 
+				"El servicio ya ha sido creado en la fecha: %s" % (_now.strftime('%Y-%m-%d')))
+			return HttpResponseRedirect("/integracion/censo/servicio/")
+
 		form = ServicioForm(request.POST)
 		if not form.is_valid():
 			messages.info(request, form.errors)
@@ -126,7 +200,7 @@ def censo_servicio(request):
 		'services': get_services_from_file(record_report.filename, extras = False),
 		'filtered': get_dict_from_data(record_report.filename),
 		'alldata': get_valid_rows(record_report.filename),
-		'list': Servicio.objects.all().order_by('-fecha')
+		'list': Servicio.objects.all().order_by('fecha')
 	}
 	return render(request, 'censo_servicio.html', context)
 
@@ -138,8 +212,8 @@ def censo_paciente_detalle(request):
 		return HttpResponseRedirect("/404/")
 	
 	context['censo'] = Censo.objects.get(id = _id)
-	
-	print(">>>>", context['censo'].salida_tipo)
+	# 
+	# print(">>>>", context['censo'].salida_tipo)
 
 	return render(request, 'censo_paciente_detalle.html', context)
 
@@ -157,6 +231,43 @@ def censo_delete(request):
 	censo_object.delete()
 
 	return HttpResponseRedirect("/integracion/censo/?servicio_id=%s" % servicio.id)
+
+def censo_input_synced(request):
+	censo_id = request.POST.get('censo_id', '-')
+	if censo_id == '-':
+		return HttpResponseRedirect("/404/")
+
+	censo_object = Censo.objects.get(id = censo_id)
+	servicio = censo_object.servicio
+	val = request.POST.get("synced")
+	
+	if val == "on":
+		censo_object.input_synced = True
+	else:
+		censo_object.input_synced = False
+	
+	censo_object.save()
+
+	return HttpResponseRedirect("/integracion/censo/?servicio_id=%s" % servicio.id)
+
+def censo_output_synced(request):
+	censo_id = request.POST.get('censo_id', '-')
+	if censo_id == '-':
+		return HttpResponseRedirect("/404/")
+
+	censo_object = Censo.objects.get(id = censo_id)
+	servicio = censo_object.servicio
+	
+	val = request.POST.get("synced")
+	
+	if val == "on":
+		censo_object.output_synced = True
+	else:
+		censo_object.output_synced = False
+
+	censo_object.save()
+
+	return HttpResponseRedirect("/integracion/censo/salidas/?servicio_id=%s" % (servicio.id))
 
 def censo_servicio_synced(request):
 	if request.method == "POST":

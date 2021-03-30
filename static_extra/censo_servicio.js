@@ -111,5 +111,19 @@ $(document).on("ready", function(){
 		var nn = getNCamas();
 		$("#inpt_ncama").val(nn);
 	});	
-	$("#censo_table").DataTable();
+	var table = $("#censo_table").DataTable({
+  		"columns": [
+  		{ "type": "num" },
+  		null,
+  		null,
+  		null,
+  		null,
+  		null,
+  		null,
+  		null,
+  		null
+  		]});
+	table
+	    .order( [ 0, 'desc' ] )
+	    .draw();	
 });

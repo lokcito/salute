@@ -4,13 +4,14 @@
 <div class="container">
 	<div class="row">
 		<div class="col">
-			<h1>Detalle de Paciente Hospitalizado</h1>
-			<h2>Ingreso</h2>
+			<h5>Detalle de Paciente Hospitalizado</h5>
+			<h5>Ingreso</h5>
+			<h6 style="border:2px solid DodgerBlue; color:blue">Servicio {% if censo %}: {{ censo.servicio.nombre }}{% endif %}</h6>
+			<h6>Fecha {% if censo %}: {{ censo.servicio.fecha }}{% endif %}</h6>
 			<table class="table table-bordered">
 				<thead>
 					<tr>
 						<th>Paciente</th>
-						<th>Servicio</th>
 						<th>Estacion</th>
 						<th>N° de Cama</th>
 						<th>Admision</th>
@@ -20,7 +21,6 @@
 				<tbody>
 					<tr>
 						<td>{{ censo.paciente.text }}</td>
-						<td>{{ censo.servicio.nombre }}</td>
 						<td>{{ censo.servicio.estacion }}</td>
 						<th>{{ censo.ncama }}</th>
 						<th>{{ censo.get_adm_text }}</th>
@@ -37,10 +37,11 @@
 				</tbody>
 			</table>
 			{% if censo.has_gone %}
-			<h2>Egreso</h2>
+			<h5>Egreso</h5>
 			<table class="table table-bordered">
 				<thead>
 				<tr>
+					<th>Fecha</th>
 					<th>Alta</th>
 					<th>Defuncion</th>
 					<th>Transferencia</th>
@@ -48,7 +49,7 @@
 				</tr>
 				</thead>
 				<tbody>
-					<tr>
+					<tr><td>{{ censo.servicio.fecha }}</td>
 						<td>{{ censo.get_alta_text }}</td>
 						<td>{{ censo.get_defuncion_text }}</td>
 						<td>{{ censo.get_transferencia_text }}</td>
@@ -57,8 +58,10 @@
 				</tbody>
 			</table>
 			{% endif %}
+			<div class="text-right" colspan="6">
 			<a href="/integracion/censo/servicio/" 
 				class="btn btn-primary">Volver a la Lista</a>
+			</div>
 		</div>
 	</div>
 </div>

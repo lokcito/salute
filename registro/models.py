@@ -4,6 +4,7 @@ from django.utils import timezone
 import math
 from django.db.models import IntegerField, Model
 from django_userforeignkey.models.fields import UserForeignKey
+from pytz import timezone as pytz_timezone
 #from django.contrib.auth.models import user
 
 
@@ -93,20 +94,35 @@ class Servicio(models.Model):
 	def get_n_salidas(self):
 		return Censo.objects.filter(servicio = self).exclude(salida_tipo = '---').count()
 
+	def get_n_pendientes_in(self):
+		return Censo.objects.filter(servicio = self, 
+				salida_tipo = '---', input_synced = False).count()
+	def get_n_pendientes_out(self):
+		return Censo.objects.filter(servicio = self, 
+				output_synced = False).exclude(salida_tipo = '---').count()		
+
 	def text(self):
-		return "%s / %s / %s / Camas: %s" % (self.nombre, self.estacion, 
+
+		tz = pytz_timezone('America/Lima')
+		start_tz = self.fecha.astimezone(tz)
+
+		return "%s / %s / %s / %s / Camas: %s" % (
+				start_tz.strftime("%Y-%m-%d"),
+				self.nombre, self.estacion, 
 				self.habitacion, str(self.ncamas))
 
 class Censo(models.Model):
 	paciente = models.ForeignKey(Paciente, 
 		on_delete=models.CASCADE)
-	ncama = IntegerField()
+	ncama = models.CharField(max_length=250)
 	adm = models.BooleanField(default=False)
 	transferencia = models.CharField(max_length=250)
 	salida_tipo = models.CharField(max_length=250, default = 'ALTA')
 	servicio = models.ForeignKey(Servicio, 
 		on_delete=models.CASCADE)
 	salida_servicio = models.CharField(max_length=250, default = '---')
+	input_synced = models.BooleanField(default=False)
+	output_synced = models.BooleanField(default=False)
 	usuario = UserForeignKey(auto_user_add=True, 
 		verbose_name='Usuario')
 	salida = models.CharField(max_length=250, 
@@ -140,18 +156,20 @@ class Censo(models.Model):
 	# 	return Censo.objects.filter(parent = self)
 
 class Pagare(models.Model):
-	fecha = models.DateField(default=datetime.now, blank=True, verbose_name='Fecha')
-	pagare = models.CharField(max_length=7, verbose_name='N° de Pagare')
-	contingencia = models.CharField(max_length=30, verbose_name='Contingencia',choices=(('NO ACREDITADO','NO ACREDITADO'),('AGRESION POR TERCEROS','AGRESION POR TERCEROS'),('ACCIDENTE DE TRANSITO','ACCIDENTE DE TRANSITO'),
+	fecha = models.DateTimeField(default=datetime.now, blank=True, verbose_name='Fecha y Hora')
+	pagare = models.CharField(max_length=7, verbose_name='N° Pagare')
+	contingencia = models.CharField(max_length=30, verbose_name='Contingencia',choices=(('ANULADO','ANULADO'),('NO ACREDITADO','NO ACREDITADO'),('AGRESION POR TERCEROS','AGRESION POR TERCEROS'),('ACCIDENTE DE TRANSITO','ACCIDENTE DE TRANSITO'),
 	('ACCIDENTE DE MOTO','ACCIDENTE DE MOTO'),('PARTICULAR','PARTICULAR'),('INTENTO DE SUICIDIO','INTENTO DE SUICIDIO')))
-	dni1 = models.CharField(max_length=8, verbose_name='D.N.I.')
-	paciente = models.CharField(max_length=35, verbose_name='Datos del Paciente')
-	dni2 = models.CharField(max_length=8, verbose_name='D.N.I')
-	aval = models.CharField(max_length=40, verbose_name='Datos del Aval')
-	domicilio = models.CharField(max_length=35, verbose_name='Domicilio')
-	movil = models.CharField(max_length=9, verbose_name='Telefono / Movil')
-	obs = models.CharField(max_length=200, verbose_name= 'Deposito/Garantia')
-	#user = UserForeignKey(auto_user_add=True, verbose_name='Responsable')
+	dni1 = models.CharField(blank = True, max_length=11, verbose_name='D.N.I.')
+	paciente = models.CharField(blank = True, max_length=35, verbose_name='Datos del Paciente')
+	dni2 = models.CharField(blank = True, max_length=8, verbose_name='D.N.I')
+	aval = models.CharField(blank = True, max_length=40, verbose_name='Datos del Aval')
+	domicilio = models.CharField(blank = True, max_length=50, verbose_name='Domicilio')
+	movil = models.CharField(blank = True, max_length=9, verbose_name='Celular')
+	obs = models.CharField(blank = True, max_length=200, verbose_name= 'DEP.', help_text='Deposito/Garantia')
+	ref = models.TextField(blank = True, max_length=100, verbose_name='Acredita-Obs', help_text='Observaciones de Acreditacion')
+	check = models.BooleanField(default=False, verbose_name='Rev.', help_text='Completa Informacion')
+	user = UserForeignKey(auto_user_add=True, verbose_name='User')
 
 	def __str__(self):
 		return self.pagare
@@ -161,6 +179,7 @@ class Pagare(models.Model):
 		self.aval = self.aval.upper()
 		self.domicilio = self.domicilio.upper()
 		self.obs = self.obs.upper()
+		self.ref = self.obs.upper()
 		super(Pagare, self).save(*args, kwargs)
 
 class FileDataReport(models.Model):

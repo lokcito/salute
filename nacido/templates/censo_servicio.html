@@ -3,31 +3,45 @@
 <div>
   <div class="container pt-3">
     <div>
-      <h3>Censos Creados</h3>
+      <h4>Monitorización - Gestión de Camas</h4>
+      <div class="text-right">
+        <a class="btn btn-info mb-2" href="/integracion/censo">Ver todos ingresos</a>
+        <a class="btn btn-primary mb-2" href="/integracion/censo/salidas">Ver todos egresos</a>
+      </div>
+      <div class="mb-4 mt-2">
+        <form action="/">
+          <input placeholder="Buscar por DNI" 
+            type="text" class="form-control">
+        </form>
+      </div>
     </div>
     <table id="censo_table" class="table table-bordered">
     <thead>
       <tr>
+        <th></th>
         <th>Fecha</th>
         <th>Servicio</th>
         <th>Estacion</th>
-        <th>Camas</th>
-        <th># Pendientes</th>
-        <th># Atendidos</th>
-        <th>Subido al sistema</th>
-        <th></th>
-        <th></th>
+        <th><i class="material-icons" style="font-size:20px;color:blue">hotel</i></th>
+        <th><i class="material-icons" style="font-size:20px;color:green">system_update_alt</i></th>
+        <th><i class="material-icons" style="font-size:19px;color:red">input</i></th>
+        <th><i class="material-icons" style="font-size:20px;color:blue">cloud_done</i> </th>
       </tr>
     </thead>
     <tbody>
       {% for x in list %}
       <tr>
-        <td> 10/02/2021</td>
+        <td>{{ x.id }}</td>
+        <td>{{ x.fecha }}</td>
         <td>{{ x.nombre }}</td>
         <td>{{ x.estacion }}</td>
         <td>{{ x.ncamas }}</td>
-        <td>{{ x.get_n_ingresos }}</td>
-        <td>{{ x.get_n_salidas }}</td>
+        <td>{{ x.get_n_pendientes_in }}
+          <a href="/integracion/censo/?servicio_id={{ x.id }}"
+          class="btn btn-info">Ingresos</a></td>
+        <td>{{ x.get_n_pendientes_out }}
+          <a href="/integracion/censo/salidas/?servicio_id={{ x.id }}" 
+          class="btn btn-primary">Egresos</a></td>
         <td>
           <form action="/integracion/censo/servicio/synced" method="POST">
             {% csrf_token %}
@@ -36,16 +50,12 @@
               onchange="this.form.submit()" type="checkbox">
           </form>
         </td>
-        <td><a href="/integracion/censo/?servicio_id={{ x.id }}" 
-          class="btn btn-info">Ingresos</a></td>
-        <td><a href="/integracion/censo/salidas/?servicio_id={{ x.id }}" 
-          class="btn btn-primary">Egresos</a></td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
   <hr>
-    <h2>Creacion de Censo - Grupo</h2>
+    <h5>Genera Censo - Servicio</h4>
     <div class="row">
       <div class="col">
         <fieldset class="border p-2 mb-4">
@@ -99,5 +109,5 @@
 <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css">
 <script type="text/javascript" src="//cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.12.0/underscore-min.js"></script>
-<script type="text/javascript" src="/static/censo_servicio.js?v=s210922"></script>
+<script type="text/javascript" src="/static/censo_servicio.js?v=s211101922"></script>
 {% endblock %}

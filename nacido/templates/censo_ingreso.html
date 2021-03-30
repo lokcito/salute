@@ -7,7 +7,12 @@
       <div class="col">
         <form action="/integracion/censo/paciente/buscar/" method="POST">
           {% csrf_token %}
-          <div class="input-group mb-3">
+          <div class="input-group mb-6">
+            {% for x in servicios %}
+            <input type="hidden" 
+              value="{{ x.id }}" 
+              name="servicio_id">   
+            {% endfor %}
             <input type="text" 
               name="dni" 
               class="form-control" 
@@ -59,7 +64,7 @@
                 <div class="col-4">
                   <div class="form-group">
                     <label># de cama</label>
-                    <input type="number" name="ncama" class="form-control"/>
+                    <input type="text" name="ncama" class="form-control"/>
                   </div>
                 </div>
                 <div class="col-4">
@@ -84,18 +89,6 @@
             </div>
           </fieldset>
         </div>
-<!--         <div class="col-6">
-          <div class="dropdown">
-            <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
-              Seleccione Estacion
-            </button>
-            <div class="dropdown-menu">
-              <a class="dropdown-item" href="#">Medicina I</a>
-              <a class="dropdown-item" href="#">Medicina II</a>
-              <a class="dropdown-item" href="#">Medicina III</a>
-            </div>
-          </div>
-        </div> -->
       </div>
     </form>
     {% endif  %}

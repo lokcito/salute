@@ -46,6 +46,122 @@ def auth_essalud():
 	# })
 	# return s
 
+def scrap_programacion():
+	_now = datetime_now()
+
+	local_filename = "./tmp/programation-%s.txt" % (_now.strftime('%Y-%m-%d-%H'))	
+	_list = []
+	_anno = []
+	_mess = []
+	if path.exists(local_filename):
+		pass
+	else:	
+		s = auth_essalud()
+		response = s.post("http://sgss.essalud/sgss/servlet/hmainmenu", 
+		allow_redirects=True, data = {
+			"_EventName": "E'OTORGAMENU'.0001",
+			"_EventGridId": "",
+			"_EventRowId": "",
+			"MPW0004_CMPPGM": "hcabecera",
+			"MPW0005_CMPPGM": "hloginmenu",
+			"GXimgMPW0005_IMGFLG": "/images/btn_previous.gif",
+			"MPW0005_NTBL": "0",
+			"MPW0005_TRAGXENC": "dRuQubbURmdcgvv/rovQ5A==",
+			"GXimg_PGMICO_0001": "/images/i_citas.jpg",
+			"_PGMCOD_0001": "C0000000000",
+			"_PGMORD_0001": "0",
+			"GXimg_PGMICO_0002": "/images/i_consexterna.jpg",
+			"_PGMCOD_0002": "E0000000000",
+			"_PGMORD_0002": "0",
+			"GXimg_PGMICO_0003": "/images/i_emergencia.jpg",
+			"_PGMCOD_0003": "G0000000000",
+			"_PGMORD_0003": "0",
+			"GXimg_PGMICO_0004": "/images/i_hospital.jpg",
+			"_PGMCOD_0004": "H0000000000",
+			"_PGMORD_0004": "0",
+			"GXimg_PGMICO_0005": "/images/i_quirurgico.jpg",
+			"_PGMCOD_0005": "I0000000000",
+			"_PGMORD_0005": "0",
+			"GXimg_PGMICO_0006": "/images/i_farmaciadep.jpg",
+			"_PGMCOD_0006": "T0000000000",
+			"_PGMORD_0006": "0",
+			"GXimg_PGMICO_0007": "/images/i_ayudadx.jpg",
+			"_PGMCOD_0007": "U0000000000",
+			"_PGMORD_0007": "0",
+			"GXimg_PGMICO_0008": "/images/i_reportes.jpg",
+			"_PGMCOD_0008": "V0000000000",
+			"_PGMORD_0008": "1",
+			"GXimg_PGMICO_0009": "/images/i_tablas.jpg",
+			"_PGMCOD_0009": "X0000000000",
+			"_PGMORD_0009": "0",
+			"GXimg_PGMICO_0010": "/images/i_liquidacion.jpg",
+			"_PGMCOD_0010": "Y0000000000",
+			"_PGMORD_0010": "0",
+			"GXimg_PGMICO_0011": "/images/i_seguridad.jpg",
+			"_PGMCOD_0011": "Z0000000000",
+			"_PGMORD_0011": "0",
+			"MPW0008_CMPPGM": "hpie",
+			"nRC_Grd_sistemas": "11",
+			"sCallerURL": "http://sgss.essalud/sgss/servlet/hmainmenu",})
+
+		lines = response.text.split(";")
+		new_path = None
+		_new = None
+		#print("|||", response.status_code)
+		for x in lines:
+			#print("===+++++>>", x)
+			if "Aprob.Programación" in x:
+				#print("::", x)
+				new_path = x.split("','")
+				if len(new_path) == 2:
+					_new = "http://sgss.essalud/sgss/servlet/%s" % (new_path[1][0:-2])
+					break
+					#print(">", x)
+		if _new is None:
+			return []
+
+		r = s.get(_new, stream=True)
+
+		with open(local_filename, 'wb') as f:
+			for chunk in r.iter_content(chunk_size=1024):
+				f.write(chunk)
+
+	f = open(local_filename, encoding="utf8", mode = 'r+')
+	lines = [line for line in f.readlines()]
+	f.close()
+
+	all_content = "".join(lines)
+
+	from lxml import html
+	soup = html.fromstring(all_content)
+	__list = soup.xpath("//select[@name='_SERVHOSCOD']/option/text()")
+	
+	for uu in __list:
+		if 'Seleccione' in uu:
+			continue
+		_list.append(uu)
+
+	__list = soup.xpath("//select[@name='_ANNO']/option/text()")
+	
+	for uu in __list:
+		if 'Seleccione' in uu:
+			continue
+		_anno.append(uu)
+
+	__list = soup.xpath("//select[@name='_MES']/option/text()")
+	
+	for uu in __list:
+		if 'Seleccione' in uu:
+			continue
+		_mess.append(uu)
+	
+
+	return {
+		'servicios': _list,
+		'anno': _anno,
+		'mes': _mess
+	};
+
 def scrap_services():
 	_now = datetime_now()
 
@@ -264,8 +380,12 @@ def get_list_from_data_vs_estacion(_all, estacion_list):
 	st = []
 	for s in estacion_list:
 		_tmpall = list(filter(lambda x: x[4] == s, _all))
+		if len(_tmpall) > 0:
+			_s = _tmpall[0][3]
+
 		st.append({
 			'text': s,
+			'_servicio': _s,
 			'data': get_analytics_from_list(_tmpall)
 
 			})
