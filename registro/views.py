@@ -25,9 +25,12 @@ def reports_programacion(request):
 	return render(request, 'reports_programacion.html', context)
 # Create your views here.
 def search_paciente_en_cesos(request):
-	pass
-
-
+	_dni = request.GET("dni", "-")
+	if _dni == "-":
+		return HttpResponseRedirect("/404/")
+	o = Censo.objects.filter(paciente__dni = _dni)
+	return render(request, 'censo_salidas.html', context)
+	
 def reports(request):
 	context = {}
 	_force = request.GET.get('force', '-') == 'true'
